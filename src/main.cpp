@@ -5,11 +5,26 @@
 #include <Adafruit_SH110X.h>
 #include <CubeSide.h>
 
+#define REF_LOW -9.8
+#define REF_RANGE 19.6
+
+#define RAW_LOW_Z 7.4
+#define RAW_HIGH_Z 12.7
+
+
+
+
 // Дисплей
 Adafruit_SH1106G display(128, 64, &Wire, -1);
 
 // Акселерометр
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
+
+float calibrateAxis(float raw, float rawLow, float rawHigh){
+  float rawRange = rawHigh - rawLow;
+
+  return (((raw - rawLow) * REF_RANGE) / rawRange) + REF_LOW;
+}
 
 CubeSide determineSide(float x, float y, float z){
   float absX = fabs(x);
@@ -58,9 +73,9 @@ void loop() {
   display.clearDisplay();
   display.setCursor(0, 0);
   
-  float x = event.acceleration.x;
-  float y = event.acceleration.y;
-  float z = event.acceleration.z;
+  float x = calibrateAxis(event.acceleration.x, -10.2, 10.2);
+  float y = calibrateAxis(event.acceleration.y, -10.4, 10.01);
+  float z = calibrateAxis(event.acceleration.z, -7.5, 12.7);
 
   display.print("X: ");
   display.println(x, 2);
