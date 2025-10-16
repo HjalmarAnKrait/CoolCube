@@ -4,6 +4,7 @@
 #include <CubeSide.h>
 #include <MedianN.cpp>
 #include <U8g2lib.h>
+#include <string.h>
 
 #define REF_LOW -9.8
 #define REF_RANGE 19.6
@@ -11,7 +12,7 @@
 #define RAW_LOW_Z 7.4
 #define RAW_HIGH_Z 12.7
 
-#define MEASURE_TOLERANCE 0.4
+#define MEASURE_TOLERANCE 0.9
 
 MedianN<float, 10> medianFilterX;
 MedianN<float, 10> medianFilterY;
@@ -139,8 +140,23 @@ void loop()
   updateStabilityTime(isMoving(vectorLength));
 
   display.setCursor(0, 40);
-  display.print("stability seconds: ");
-  display.print(currentStabilityDuration / 1000);
+  display.print("stab (mm:ss): ");
+  display.setCursor(0, 50);
+
+  uint16_t stabilitySeconds = currentStabilityDuration / 1000;
+  uint16_t seconds = stabilitySeconds % 60;
+  uint16_t minutes = (stabilitySeconds - seconds) / 60;
+
+
+  if(minutes < 10){
+    display.print('0');
+  }
+  display.print(minutes);
+  display.print(" : ");
+  if(seconds < 10){
+    display.print('0');
+  }
+  display.print(seconds);
 
   display.sendBuffer();
   delay(10);
